@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os 
+import click
   
 def merge_lines(lines, angle_thresh=5):
     merged = []
@@ -94,21 +95,26 @@ def enhance_contrast(img):
         lab = cv2.merge((l2,a,b))
         return cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
         
-file_dir = r"C:\Users\sangy\Documents\test_c\half-moon_cvi\narrow"
-files = os.listdir(file_dir)
-for file in files:
-    if file.lower().endswith(".tif"):
-        filename = os.path.join(file_dir, file)
+@click.command()
+@click.option('--file-dir', required=True, type=click.Path(exists=True, file_okay=False),
+              help="Directory containing .tif images")
+def main(file_dir):
+    files = os.listdir(file_dir)
+    for file in files:
+        if file.lower().endswith(".tif"):
+            filename = os.path.join(file_dir, file)
 
-        # Read .tif image
-        ful_img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)  # or IMREAD_COLOR if needed
-        if ful_img is None:
-            print(f"Could not read {filename}")
-            continue
+            # Read .tif image
+            ful_img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+            if ful_img is None:
+                print(f"Could not read {filename}")
+                continue
 
-        # Contrast enhancement
-        enhanced_img = enhance_contrast(ful_img)
+            # Contrast enhancement
+            enhanced_img = enhance_contrast(ful_img)
 
-        # Call your detection function
-        detection_midpoint(enhanced_img)
-    
+            # Call detection function
+            detection_midpoint(enhanced_img)
+
+if __name__ == "__main__":
+    main()
